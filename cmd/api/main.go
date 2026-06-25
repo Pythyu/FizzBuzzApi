@@ -1,23 +1,21 @@
 package main
 
 import (
+	"FizzBuzzApi/cmd/api/router"
 	"FizzBuzzApi/config"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 )
 
 func main() {
 	cfg := config.NewServerConfig()
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", sayHello)
+	apiRouter := router.New()
 
 	s := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
-		Handler:      mux,
+		Handler:      apiRouter,
 		ReadTimeout:  cfg.TimeoutRead,
 		WriteTimeout: cfg.TimeoutWrite,
 		IdleTimeout:  cfg.TimeoutIdle,
@@ -26,12 +24,5 @@ func main() {
 	log.Printf("Starting server :%d\n", cfg.Port)
 	if err := s.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal("Server startup failed")
-	}
-}
-
-func sayHello(w http.ResponseWriter, r *http.Request) {
-	_, err := io.WriteString(w, "Hello World o/")
-	if err != nil {
-		return
 	}
 }
