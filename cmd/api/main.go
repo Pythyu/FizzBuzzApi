@@ -1,26 +1,30 @@
 package main
 
 import (
+	"FizzBuzzApi/config"
+	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"time"
 )
 
 func main() {
+	cfg := config.NewServerConfig()
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("/hi", sayHello)
+	mux.HandleFunc("/", sayHello)
 
 	s := &http.Server{
-		Addr:         ":8989",
+		Addr:         fmt.Sprintf(":%d", cfg.Port),
 		Handler:      mux,
-		ReadTimeout:  2 * time.Second,
-		WriteTimeout: 2 * time.Second,
-		IdleTimeout:  5 * time.Second,
+		ReadTimeout:  cfg.TimeoutRead,
+		WriteTimeout: cfg.TimeoutWrite,
+		IdleTimeout:  cfg.TimeoutIdle,
 	}
 
-	log.Println("Starting server :8989")
-	if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	log.Printf("Starting server :%d\n", cfg.Port)
+	if err := s.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal("Server startup failed")
 	}
 }
