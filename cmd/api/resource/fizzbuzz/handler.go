@@ -2,6 +2,7 @@ package fizzbuzz
 
 import (
 	errorHandler "FizzBuzzApi/cmd/api/resource/common/err"
+	helper "FizzBuzzApi/cmd/api/resource/common/helpers"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -39,7 +40,7 @@ func (f *FizzBuzzApi) ComputeFizzBuzz(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("["))
+	helper.SafeWrite(w, []byte("["))
 	blockNumber := (limit_integer-1)/outputBlockSize + 1
 	for i := range blockNumber {
 		start := i*outputBlockSize + 1
@@ -56,15 +57,18 @@ func (f *FizzBuzzApi) ComputeFizzBuzz(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if start != 1 {
-			w.Write([]byte(","))
+			helper.SafeWrite(w, []byte(","))
 		}
-		w.Write(bytes[1 : len(bytes)-1])
+		helper.SafeWrite(w, bytes[1:len(bytes)-1])
 	}
-	w.Write([]byte("]"))
+	helper.SafeWrite(w, []byte("]"))
 
 }
 
 func (f *FizzBuzzApi) GetMostPopularFizzBuzz(w http.ResponseWriter, r *http.Request) {
 
-	io.WriteString(w, "Not Implemented Yet")
+	_, err := io.WriteString(w, "Not Implemented Yet")
+	if err != nil {
+		return
+	}
 }
