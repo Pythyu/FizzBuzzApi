@@ -13,16 +13,17 @@ func isMultipleOf(number int, mult1 int, mult2 int) int {
 	return idx
 }
 
-func (f *FizzBuzzApi) FizzBuzz(firstMult int, secondMult int, limit int, fizzStr string, buzzStr string) string {
-	var output string
+func (f *FizzBuzzApi) FizzBuzz(firstMult int, secondMult int, start int, limit int, fizzStr string, buzzStr string) []string {
+	var output []string
 	var pattern [4]string = [4]string{"", fizzStr, buzzStr, fizzStr + buzzStr}
-	for i := 1; i <= limit; i += 1 {
+	for i := start; i <= limit; i += 1 {
 		patternIndex := isMultipleOf(i, firstMult, secondMult)
 		if patternIndex > 0 {
-			output += pattern[patternIndex]
+			output = append(output, pattern[patternIndex])
 		} else {
-			output += strconv.Itoa(i)
+			output = append(output, strconv.Itoa(i))
 		}
 	}
+
 	return output
 }

@@ -8,6 +8,8 @@ import (
 	"strconv"
 )
 
+const outputBlockSize = 1024
+
 type FizzBuzzApi struct{}
 
 func (f *FizzBuzzApi) ComputeFizzBuzz(w http.ResponseWriter, r *http.Request) {
@@ -36,13 +38,29 @@ func (f *FizzBuzzApi) ComputeFizzBuzz(w http.ResponseWriter, r *http.Request) {
 		errorHandler.BadRequestError(w, "Invalid field buzzString")
 		return
 	}
-
-	output := f.FizzBuzz(first_multiple, second_multiple, limit_integer, fizzString, buzzString)
-
-	if err := json.NewEncoder(w).Encode(output); err != nil {
-		errorHandler.ServerError(w, "json encode failure")
-		return
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte("["))
+	blockNumber := (limit_integer-1)/outputBlockSize + 1
+	for i := range blockNumber {
+		start := i*outputBlockSize + 1
+		var end int
+		if i+1 == blockNumber {
+			end = limit_integer
+		} else {
+			end = i*outputBlockSize + outputBlockSize
+		}
+		output := f.FizzBuzz(first_multiple, second_multiple, start, end, fizzString, buzzString)
+		bytes, err := json.Marshal(output)
+		if err != nil {
+			errorHandler.ServerError(w, "Failed to marshal JSON")
+			return
+		}
+		if start != 1 {
+			w.Write([]byte(","))
+		}
+		w.Write(bytes[1 : len(bytes)-1])
 	}
+	w.Write([]byte("]"))
 
 }
 
