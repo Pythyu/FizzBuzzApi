@@ -6,6 +6,11 @@ on:
 env:
   # image_tag: {branch}_{full_sha}_{run_id}
   IMAGE_TAG: "${{ github.head_ref || github.ref_name }}_${{ github.sha }}_${{github.run_id}}"
+  SERVER_PORT: 8989
+  SERVER_TIMEOUT_READ: 3s
+  SERVER_TIMEOUT_WRITE: 5s
+  SERVER_TIMEOUT_IDLE: 5s
+  SERVER_DEBUG: true
 
 jobs:
   docker:
