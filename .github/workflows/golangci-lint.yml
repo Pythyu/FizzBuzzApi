@@ -3,12 +3,10 @@ on: [push]
 
 permissions:
   contents: read
-  # Optional: allow read access to pull requests. Use with `only-new-issues` option.
-  # pull-requests: read
 
 jobs:
   golangci:
-    name: lint
+    name: Running go linter
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

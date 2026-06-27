@@ -1,6 +1,7 @@
 services:
   app:
     build: .
+    image: marethyuu/public_storage:${IMAGE_TAG}
     env_file: .env
     ports:
       - "8989:8989"
