@@ -4,8 +4,8 @@ on:
   - workflow_dispatch
 
 env:
-  # image_tag: {branch}@{full_sha}_{run_id}
-  IMAGE_TAG: "${{ github.head_ref || github.ref_name }}@${{ github.sha }}_${{github.run_id}}"
+  # image_tag: {branch}_{full_sha}_{run_id}
+  IMAGE_TAG: "${{ github.head_ref || github.ref_name }}_${{ github.sha }}_${{github.run_id}}"
 
 jobs:
   docker:
