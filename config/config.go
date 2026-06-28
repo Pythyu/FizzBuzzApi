@@ -4,32 +4,22 @@ import (
 	"log"
 	"time"
 
-	"github.com/joeshaw/envdecode"
+	"github.com/caarlos0/env/v11"
 )
 
-const defaultServerPort = 8080
-const defaultServerWriteTimeout = 5
-const defaultServerReadTimeout = 3
-const defaultServerIdleTimeout = 5
-
 type ServerConfig struct {
-	Port         int           `env:"SERVER_PORT"`
-	TimeoutRead  time.Duration `env:"SERVER_TIMEOUT_READ"`
-	TimeoutWrite time.Duration `env:"SERVER_TIMEOUT_WRITE"`
-	TimeoutIdle  time.Duration `env:"SERVER_TIMEOUT_IDLE"`
-	Debug        bool          `env:"SERVER_DEBUG"`
+	Port         int           `env:"SERVER_PORT" envDefault:"8080"`
+	TimeoutRead  time.Duration `env:"SERVER_TIMEOUT_READ" envDefault:"3s"`
+	TimeoutWrite time.Duration `env:"SERVER_TIMEOUT_WRITE" envDefault:"5s"`
+	TimeoutIdle  time.Duration `env:"SERVER_TIMEOUT_IDLE" envDefault:"5s"`
+	Debug        bool          `env:"SERVER_DEBUG" envDefault:"false"`
 }
 
 func NewServerConfig() *ServerConfig {
-	config := &ServerConfig{
-		Port:         defaultServerPort,
-		TimeoutRead:  defaultServerReadTimeout * time.Second,
-		TimeoutWrite: defaultServerWriteTimeout * time.Second,
-		TimeoutIdle:  defaultServerIdleTimeout * time.Second,
-		Debug:        false,
-	}
-	if err := envdecode.Decode(config); err != nil {
-		log.Fatalf("Failed to decode the server config: %s", err)
+	config := &ServerConfig{}
+
+	if err := env.Parse(config); err != nil {
+		log.Fatalf("Failed to decode the server config: %v", err)
 	}
 
 	return config
