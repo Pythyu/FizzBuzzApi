@@ -6,51 +6,60 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strconv"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/schema"
 )
 
 const outputBlockSize = 1024
 
-type FizzBuzzApi struct{}
+type FizzBuzzApi struct {
+	validate *validator.Validate
+}
+
+func NewFizzBuzzApi(validate *validator.Validate) *FizzBuzzApi {
+	return &FizzBuzzApi{
+		validate: validate,
+	}
+}
+
+type FizzBuzzRequestParameters struct {
+	FirstMultiple  int    `schema:"first_multiple" validate:"required,gt=0"`
+	SecondMultiple int    `schema:"second_multiple" validate:"required,gt=0"`
+	LimitInteger   int    `schema:"limit_integer" validate:"required,gte=1"`
+	FizzString     string `schema:"fizzString" validate:"required"`
+	BuzzString     string `schema:"buzzString" validate:"required"`
+}
 
 func (f *FizzBuzzApi) ComputeFizzBuzz(w http.ResponseWriter, r *http.Request) {
-	first_multiple, err := strconv.Atoi(r.URL.Query().Get("first_multiple"))
-	if err != nil {
-		errorHandler.BadRequestError(w, "Invalid field first_multiple")
+
+	var req FizzBuzzRequestParameters
+
+	decoder := schema.NewDecoder()
+	decoder.IgnoreUnknownKeys(true)
+
+	if err := decoder.Decode(&req, r.URL.Query()); err != nil {
+		errorHandler.BadRequestError(w, err.Error())
 		return
 	}
-	second_multiple, err := strconv.Atoi(r.URL.Query().Get("second_multiple"))
-	if err != nil {
-		errorHandler.BadRequestError(w, "Invalid field second_multiple")
+
+	if err := f.validate.Struct(req); err != nil {
+		errorHandler.BadRequestError(w, err.Error())
 		return
 	}
-	limit_integer, err := strconv.Atoi(r.URL.Query().Get("limit_integer"))
-	if err != nil {
-		errorHandler.BadRequestError(w, "Invalid field limit_integer")
-		return
-	}
-	fizzString := r.URL.Query().Get("fizzString")
-	if fizzString == "" {
-		errorHandler.BadRequestError(w, "Invalid field fizzString")
-		return
-	}
-	buzzString := r.URL.Query().Get("buzzString")
-	if buzzString == "" {
-		errorHandler.BadRequestError(w, "Invalid field buzzString")
-		return
-	}
+
 	w.Header().Set("Content-Type", "application/json")
 	helper.SafeWrite(w, []byte("["))
-	blockNumber := (limit_integer-1)/outputBlockSize + 1
+	blockNumber := (req.LimitInteger-1)/outputBlockSize + 1
 	for i := range blockNumber {
 		start := i*outputBlockSize + 1
 		var end int
 		if i+1 == blockNumber {
-			end = limit_integer
+			end = req.LimitInteger
 		} else {
 			end = i*outputBlockSize + outputBlockSize
 		}
-		output := f.FizzBuzz(first_multiple, second_multiple, start, end, fizzString, buzzString)
+		output := f.FizzBuzz(req.FirstMultiple, req.SecondMultiple, start, end, req.FizzString, req.BuzzString)
 		bytes, err := json.Marshal(output)
 		if err != nil {
 			errorHandler.ServerError(w, "Failed to marshal JSON")
