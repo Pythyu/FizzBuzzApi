@@ -2,9 +2,12 @@ package fizzbuzz
 
 import (
 	"FizzBuzzApi/cmd/api/resource/common/helpers"
+	"encoding/json"
 	"fmt"
 	"io"
 	"testing"
+
+	"github.com/go-playground/validator/v10"
 )
 
 const BigRequestBodyLength = 1190744
@@ -16,8 +19,13 @@ func generateURL(first_multiple, second_multiple, limit_integer int, fizzString,
 	return fmt.Sprintf(urlPattern, first_multiple, second_multiple, limit_integer, fizzString, buzzString)
 }
 
+type errorJSON struct {
+	Errors []string `json:"errors"`
+}
+
 func TestFizzBuzz_BasicRequest(t *testing.T) {
-	f := FizzBuzzApi{}
+	v := validator.New()
+	f := NewFizzBuzzApi(v)
 	resp := helpers.MockGetRequest(generateURL(3, 5, 15, "fizz", "buzz"), f.ComputeFizzBuzz)
 
 	if resp.StatusCode != 200 {
@@ -36,7 +44,8 @@ func TestFizzBuzz_BasicRequest(t *testing.T) {
 }
 
 func TestFizzBuzz_BigRequest(t *testing.T) {
-	f := FizzBuzzApi{}
+	v := validator.New()
+	f := NewFizzBuzzApi(v)
 	resp := helpers.MockGetRequest(generateURL(3, 5, 150000, "fuzz", "bizz"), f.ComputeFizzBuzz)
 
 	if resp.StatusCode != 200 {
@@ -51,5 +60,110 @@ func TestFizzBuzz_BigRequest(t *testing.T) {
 
 	if len(body) != BigRequestBodyLength {
 		t.Fatalf("Unexpected body length: %d", len(body))
+	}
+}
+
+func TestFizzBuzz_BadRequest1(t *testing.T) {
+	v := validator.New()
+	f := NewFizzBuzzApi(v)
+	resp := helpers.MockGetRequest(generateURL(-1, 5, 15, "fizz", "buzz"), f.ComputeFizzBuzz)
+
+	if resp.StatusCode != 400 {
+		t.Fatalf("Unexpected status code: %d", resp.StatusCode)
+	}
+
+	if resp.Header.Get("Content-Type") != "application/json" {
+		t.Fatalf("Unexpected content type: %s", resp.Header.Get("Content-Type"))
+	}
+
+	var errors errorJSON
+
+	err := json.NewDecoder(resp.Body).Decode(&errors)
+	if err != nil {
+		t.Fatalf("Unable to parse the request's error: %s", err)
+	}
+	if len(errors.Errors) != 1 {
+		t.Fatalf("Unexpected number of errors: %d", len(errors.Errors))
+	}
+	if errors.Errors[0] != "FirstMultiple must be greater than 0" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
+	}
+}
+
+func TestFizzBuzz_BadRequestAllWrong(t *testing.T) {
+	v := validator.New()
+	f := NewFizzBuzzApi(v)
+	resp := helpers.MockGetRequest(generateURL(-1, -4, -2, "", ""), f.ComputeFizzBuzz)
+
+	if resp.StatusCode != 400 {
+		t.Fatalf("Unexpected status code: %d", resp.StatusCode)
+	}
+
+	if resp.Header.Get("Content-Type") != "application/json" {
+		t.Fatalf("Unexpected content type: %s", resp.Header.Get("Content-Type"))
+	}
+
+	var errors errorJSON
+
+	err := json.NewDecoder(resp.Body).Decode(&errors)
+	if err != nil {
+		t.Fatalf("Unable to parse the request's error: %s", err)
+	}
+	if len(errors.Errors) != 5 {
+		t.Fatalf("Unexpected number of errors: %d", len(errors.Errors))
+	}
+	if errors.Errors[0] != "FirstMultiple must be greater than 0" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
+	}
+	if errors.Errors[1] != "SecondMultiple must be greater than 0" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
+	}
+	if errors.Errors[2] != "LimitInteger must be greater or equal than 1" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
+	}
+	if errors.Errors[3] != "FizzString is a required field" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
+	}
+	if errors.Errors[4] != "BuzzString is a required field" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
+	}
+}
+
+func TestFizzBuzz_BadRequestAllNull(t *testing.T) {
+	v := validator.New()
+	f := NewFizzBuzzApi(v)
+	resp := helpers.MockGetRequest(generateURL(0, 0, 0, "", ""), f.ComputeFizzBuzz)
+
+	if resp.StatusCode != 400 {
+		t.Fatalf("Unexpected status code: %d", resp.StatusCode)
+	}
+
+	if resp.Header.Get("Content-Type") != "application/json" {
+		t.Fatalf("Unexpected content type: %s", resp.Header.Get("Content-Type"))
+	}
+
+	var errors errorJSON
+
+	err := json.NewDecoder(resp.Body).Decode(&errors)
+	if err != nil {
+		t.Fatalf("Unable to parse the request's error: %s", err)
+	}
+	if len(errors.Errors) != 5 {
+		t.Fatalf("Unexpected number of errors: %d", len(errors.Errors))
+	}
+	if errors.Errors[0] != "FirstMultiple is a required field" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
+	}
+	if errors.Errors[1] != "SecondMultiple is a required field" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
+	}
+	if errors.Errors[2] != "LimitInteger is a required field" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
+	}
+	if errors.Errors[3] != "FizzString is a required field" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
+	}
+	if errors.Errors[4] != "BuzzString is a required field" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
 }

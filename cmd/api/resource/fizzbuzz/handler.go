@@ -32,7 +32,7 @@ type FizzBuzzRequestParameters struct {
 }
 
 func (f *FizzBuzzApi) ComputeFizzBuzz(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Set("Content-Type", "application/json")
 	var req FizzBuzzRequestParameters
 
 	decoder := schema.NewDecoder()
@@ -44,11 +44,13 @@ func (f *FizzBuzzApi) ComputeFizzBuzz(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := f.validate.Struct(req); err != nil {
-		errorHandler.BadRequestError(w, err.Error())
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errorHandler.BadRequestValidatorError(w, validationErrors)
+		} else {
+			errorHandler.BadRequestError(w, err.Error())
+		}
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
 	helper.SafeWrite(w, []byte("["))
 	blockNumber := (req.LimitInteger-1)/outputBlockSize + 1
 	for i := range blockNumber {
