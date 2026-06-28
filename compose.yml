@@ -6,4 +6,4 @@ services:
       - path: .env
         required: false
     ports:
-      - "8989:8989"
+      - "${SERVER_PORT}:${SERVER_PORT}"

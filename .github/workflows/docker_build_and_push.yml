@@ -1,7 +1,9 @@
 name: docker_build_and_push.yml
 on:
-  - push
-  - workflow_dispatch
+  workflow_run:
+    workflows: ["Run code quality tests"]
+    types:
+      - completed
 
 env:
   # image_tag: {branch}_{full_sha}_{run_id}
