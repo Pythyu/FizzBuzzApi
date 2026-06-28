@@ -6,7 +6,7 @@ on:
       - completed
 
 env:
-  # image_tag: {branch}_{full_sha}_{run_id}
+  IMAGE_NAME: marethyuu/public_storage
   IMAGE_TAG: "${{ github.event.workflow_run.head_branch }}_${{ github.event.workflow_run.head_sha }}_${{github.run_id}}"
 
 jobs:
@@ -27,5 +27,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - run: docker compose build
-      - run: docker compose push
+      - run: docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest_dev
+      - run: docker push $IMAGE_NAME:$IMAGE_TAG
+      - run: docker push $IMAGE_NAME:latest_dev
 
