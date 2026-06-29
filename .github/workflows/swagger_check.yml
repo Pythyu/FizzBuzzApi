@@ -20,7 +20,7 @@ jobs:
         run: go install github.com/swaggo/swag/cmd/swag@latest
 
       - name: Generate Swagger
-        run: swag init
+        run: cd cmd/api && swag init
 
       - name: Check for changes
         run: |
