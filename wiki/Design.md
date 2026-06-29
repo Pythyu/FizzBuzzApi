@@ -92,6 +92,15 @@ On a more serious application deployed on multiple instances,
 it would likely be stored within a datastore like redis or postgreSQL to avoid losing the value to restart 
 and allow multiple node to gather data for the stats.
 
+### Configuration using environment variables
+ - Environment-driven → application and configuration is separated
+ - Easy to use within different environment, local-dev, CI, prod
+
+### Rate limiting
+I set some arbitrary values to protect it against extreme abuse. 
+I didn't try to maximum the throughput since it's not a real end user application,
+simply providing a fair access meanwhile safe guarding against obvious malicious intent.
+
 
 
 
