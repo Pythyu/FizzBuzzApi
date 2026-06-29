@@ -6,13 +6,13 @@ require github.com/go-chi/chi/v5 v5.3.0
 
 require (
 	github.com/caarlos0/env/v11 v11.4.1
+	github.com/go-chi/httprate v0.15.0
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/gorilla/schema v1.4.1
 )
 
 require (
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
-	github.com/go-chi/httprate v0.15.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
