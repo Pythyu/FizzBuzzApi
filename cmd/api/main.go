@@ -1,8 +1,8 @@
 package main
 
 import (
+	"FizzBuzzApi/cmd/api/config"
 	"FizzBuzzApi/cmd/api/router"
-	"FizzBuzzApi/config"
 	"errors"
 	"fmt"
 	"log"
