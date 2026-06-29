@@ -26,7 +26,7 @@ func NewFizzBuzzApi(validate *validator.Validate) *FizzBuzzApi {
 type FizzBuzzRequestParameters struct {
 	FirstMultiple  int    `schema:"first_multiple" validate:"required,gt=0"`
 	SecondMultiple int    `schema:"second_multiple" validate:"required,gt=0"`
-	LimitInteger   int    `schema:"limit_integer" validate:"required,gte=1"`
+	LimitInteger   int    `schema:"limit_integer" validate:"required,gte=1,lte=50000"`
 	FizzString     string `schema:"fizzString" validate:"required"`
 	BuzzString     string `schema:"buzzString" validate:"required"`
 }

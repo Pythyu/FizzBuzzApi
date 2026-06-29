@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/go-playground/validator/v10"
 )
 
-const BigRequestBodyLength = 1190744
+const BigRequestBodyLength = 384076
 
 var urlPattern = "http://0.0.0.0/v1/fizzbuzz?first_multiple=%d&second_multiple=%d&limit_integer=%d&fizzString=%s&buzzString=%s"
 var classicFizzBuzzString = `["1","2","fizz","4","buzz","fizz","7","8","fizz","buzz","11","fizz","13","14","fizzbuzz"]`
@@ -46,7 +48,7 @@ func TestFizzBuzz_BasicRequest(t *testing.T) {
 func TestFizzBuzz_BigRequest(t *testing.T) {
 	v := validator.New()
 	f := NewFizzBuzzApi(v)
-	resp := helpers.MockGetRequest(generateURL(3, 5, 150000, "fuzz", "bizz"), f.ComputeFizzBuzz)
+	resp := helpers.MockGetRequest(generateURL(3, 5, 50000, "fuzz", "bizz"), f.ComputeFizzBuzz)
 
 	if resp.StatusCode != 200 {
 		t.Fatalf("Unexpected status code: %d", resp.StatusCode)
@@ -60,6 +62,33 @@ func TestFizzBuzz_BigRequest(t *testing.T) {
 
 	if len(body) != BigRequestBodyLength {
 		t.Fatalf("Unexpected body length: %d", len(body))
+	}
+}
+
+func TestFizzBuzz_TooBigRequest(t *testing.T) {
+	v := validator.New()
+	f := NewFizzBuzzApi(v)
+	resp := helpers.MockGetRequest(generateURL(3, 5, 5000000, "fuzz", "bizz"), f.ComputeFizzBuzz)
+
+	if resp.StatusCode != 400 {
+		t.Fatalf("Unexpected status code: %d", resp.StatusCode)
+	}
+
+	if resp.Header.Get("Content-Type") != "application/json" {
+		t.Fatalf("Unexpected content type: %s", resp.Header.Get("Content-Type"))
+	}
+
+	var errors errorJSON
+
+	err := json.NewDecoder(resp.Body).Decode(&errors)
+	if err != nil {
+		t.Fatalf("Unable to parse the request's error: %s", err)
+	}
+	if len(errors.Errors) != 1 {
+		t.Fatalf("Unexpected number of errors: %d", len(errors.Errors))
+	}
+	if errors.Errors[0] != "LimitInteger must be lower or equal than 50000" {
+		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
 }
 
@@ -166,4 +195,24 @@ func TestFizzBuzz_BadRequestAllNull(t *testing.T) {
 	if errors.Errors[4] != "BuzzString is a required field" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
+}
+
+func BenchmarkRequests(b *testing.B) {
+	if os.Getenv("CI") != "" {
+		b.Skip("Skipping because benchmark are not meant to run on CI")
+	}
+	fullURL := generateURL(3, 5, 5000, "fizz", "buzz")
+	v := validator.New()
+	f := NewFizzBuzzApi(v)
+	b.RunParallel(func(pb *testing.PB) {
+		req := httptest.NewRequest("GET", fullURL, nil)
+		w := httptest.NewRecorder()
+
+		b.ReportAllocs()
+		b.ResetTimer()
+
+		for pb.Next() {
+			f.ComputeFizzBuzz(w, req)
+		}
+	})
 }

@@ -38,6 +38,8 @@ func BadRequestValidatorError(w http.ResponseWriter, validatorError validator.Va
 			resp.Errors[idx] = fmt.Sprintf("%s must be greater than %s", errorValue.Field(), errorValue.Param())
 		case "gte":
 			resp.Errors[idx] = fmt.Sprintf("%s must be greater or equal than %s", errorValue.Field(), errorValue.Param())
+		case "lte":
+			resp.Errors[idx] = fmt.Sprintf("%s must be lower or equal than %s", errorValue.Field(), errorValue.Param())
 		default:
 			resp.Errors[idx] = fmt.Sprintf("something wrong on %s; %s", errorValue.Field(), errorValue.Tag())
 		}
