@@ -1,12 +1,14 @@
 package router
 
 import (
+	_ "FizzBuzzApi/cmd/api/docs"
 	"FizzBuzzApi/cmd/api/resource/fizzbuzz"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httprate"
 	"github.com/go-playground/validator/v10"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func New() *chi.Mux {
@@ -20,6 +22,8 @@ func New() *chi.Mux {
 		r.Get("/fizzbuzz", FBApi.ComputeFizzBuzz)
 		r.Get("/stats", FBApi.GetMostPopularFizzBuzz)
 	})
+
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	return r
 }

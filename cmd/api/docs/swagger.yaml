@@ -1,0 +1,107 @@
+basePath: /v1
+definitions:
+  err.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  fizzbuzz.FizzBuzzRequestParameters:
+    properties:
+      buzzString:
+        type: string
+      firstMultiple:
+        type: integer
+      fizzString:
+        type: string
+      limitInteger:
+        maximum: 50000
+        minimum: 1
+        type: integer
+      secondMultiple:
+        type: integer
+    required:
+    - buzzString
+    - firstMultiple
+    - fizzString
+    - limitInteger
+    - secondMultiple
+    type: object
+  fizzbuzz.mostPopularJsonResponse:
+    properties:
+      call_number:
+        type: integer
+      parameters:
+        $ref: '#/definitions/fizzbuzz.FizzBuzzRequestParameters'
+    type: object
+info:
+  contact:
+    email: some.fake@gmail.com
+    name: Fizz Buzzer
+  description: An API to generate FizzBuzz that will Fizz and Buzz however you want
+  title: FizzBuzz API
+  version: "1.0"
+paths:
+  /fizzbuzz:
+    get:
+      description: Returns a fully customizable FizzBuzz sequence
+      parameters:
+      - description: First multiple for fizz
+        in: query
+        name: first_multiple
+        required: true
+        type: integer
+      - description: Second multiple for buzz
+        in: query
+        name: second_multiple
+        required: true
+        type: integer
+      - description: Limit number of the sequence
+        in: query
+        name: limit_integer
+        required: true
+        type: integer
+      - description: Fizz replacement
+        in: query
+        name: fizzString
+        required: true
+        type: string
+      - description: Buzz replacement
+        in: query
+        name: buzzString
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/err.ErrorResponse'
+      summary: Compute the FizzBuzz sequence
+      tags:
+      - FizzBuzz
+  /stats:
+    get:
+      description: Returns the parameters corresponding to the most frequently requested
+        FizzBuzz computation and the number of times it has been called.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fizzbuzz.mostPopularJsonResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/err.ErrorResponse'
+      summary: Get FizzBuzz statistics
+      tags:
+      - Statistics
+swagger: "2.0"
