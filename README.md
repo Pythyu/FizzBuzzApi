@@ -21,8 +21,9 @@ More details on the repository design [here](wiki/Design.md)
 
 More details on these features [here](wiki/Features.md)
 
-
 ## Installation
+
+If you want to simply run it without building it, you can find each commit's docker image on this [dockerhub registry](https://hub.docker.com/repository/docker/marethyuu/public_storage/general).
 
 ### Requirements
  - Go 1.26.4
