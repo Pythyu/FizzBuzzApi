@@ -34,6 +34,20 @@ type FizzBuzzRequestParameters struct {
 	BuzzString     string `schema:"buzzString" validate:"required"`
 }
 
+// ComputeFizzBuzz generate a custom FizzBuzz sequence based on given parameters
+//
+// @Summary               Compute the FizzBuzz sequence
+// @Description           Returns a fully customizable FizzBuzz sequence
+// @Tags                  FizzBuzz
+// @Produce               JSON
+// @Param first_multiple  query int true "First multiple for fizz"
+// @Param second_multiple query int true "Second multiple for buzz"
+// @Param limit_integer   query int true "Limit number of the sequence"
+// @Param fizzString      query string true "Fizz replacement"
+// @Param buzzString      query string true "Buzz replacement"
+// @Success               200 {array} string
+// @Failure               400 {object} errorHandler.ErrorResponse
+// @Router                /v1/fizzbuzz [get]
 func (f *FizzBuzzApi) ComputeFizzBuzz(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var req FizzBuzzRequestParameters
@@ -87,6 +101,15 @@ type mostPopularJsonResponse struct {
 	CallNumber int                       `json:"call_number"`
 }
 
+// GetMostPopularFizzBuzz returns the most frequently requested FizzBuzz parameters.
+//
+// @Summary      Get FizzBuzz statistics
+// @Description  Returns the parameters corresponding to the most frequently requested FizzBuzz computation and the number of times it has been called.
+// @Tags         Statistics
+// @Produce      JSON
+// @Success      200 {object} mostPopularJsonResponse
+// @Failure      500 {object} errorHandler.ErrorResponse
+// @Router       /v1/stats [get]
 func (f *FizzBuzzApi) GetMostPopularFizzBuzz(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	mostPopular, callAmount := f.requestStats.GetMostPopular()

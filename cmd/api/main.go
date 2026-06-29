@@ -9,6 +9,14 @@ import (
 	"net/http"
 )
 
+// @title FizzBuzz API
+// @version 1.0
+// @description An API to generate FizzBuzz that will Fizz and Buzz however you want
+
+// @contact.name Fizz Buzzer
+// @contact.email some.fake@gmail.com
+
+// @BasePath /v1
 func main() {
 	cfg := config.NewServerConfig()
 	apiRouter := router.New()

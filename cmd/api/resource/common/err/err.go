@@ -9,26 +9,33 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-const jsonErrorTemplate = `{"error":"%s"}`
-
-type ErrValidatorResponse struct {
+type ValidatorResponse struct {
 	Errors []string `json:"errors"`
 }
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
+func WriteError(w http.ResponseWriter, status int, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	_ = json.NewEncoder(w).Encode(ErrorResponse{
+		Error: message,
+	})
+}
+
 func ServerError(w http.ResponseWriter, errorMessage string) {
-	resp := fmt.Sprintf(jsonErrorTemplate, errorMessage)
-	w.WriteHeader(http.StatusInternalServerError)
-	helpers.SafeWrite(w, []byte(resp))
+	WriteError(w, http.StatusInternalServerError, errorMessage)
 }
 
 func BadRequestError(w http.ResponseWriter, errorMessage string) {
-	resp := fmt.Sprintf(jsonErrorTemplate, errorMessage)
-	w.WriteHeader(http.StatusBadRequest)
-	helpers.SafeWrite(w, []byte(resp))
+	WriteError(w, http.StatusBadRequest, errorMessage)
 }
 
 func BadRequestValidatorError(w http.ResponseWriter, validatorError validator.ValidationErrors) {
-	resp := ErrValidatorResponse{Errors: make([]string, len(validatorError))}
+	resp := ValidatorResponse{Errors: make([]string, len(validatorError))}
 
 	for idx, errorValue := range validatorError {
 		switch errorValue.ActualTag() {
