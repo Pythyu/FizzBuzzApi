@@ -1,0 +1,31 @@
+name: Check Swagger
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  swagger:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Install swag
+        run: go install github.com/swaggo/swag/cmd/swag@latest
+
+      - name: Generate Swagger
+        run: swag init
+
+      - name: Check for changes
+        run: |
+          if ! git diff --exit-code; then
+            echo "Swagger documentation is out of date."
+            echo "Run 'swag init' and commit the generated files."
+            exit 1
+          fi
