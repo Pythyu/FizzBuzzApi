@@ -4,7 +4,6 @@ import (
 	errorHandler "FizzBuzzApi/cmd/api/resource/common/err"
 	helper "FizzBuzzApi/cmd/api/resource/common/helpers"
 	"encoding/json"
-	"io"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -14,12 +13,16 @@ import (
 const outputBlockSize = 1024
 
 type FizzBuzzApi struct {
-	validate *validator.Validate
+	validate     *validator.Validate
+	requestStats *FizzBuzzRequestStats
 }
 
 func NewFizzBuzzApi(validate *validator.Validate) *FizzBuzzApi {
 	return &FizzBuzzApi{
 		validate: validate,
+		requestStats: &FizzBuzzRequestStats{
+			rqMap: make(map[FizzBuzzRequestParameters]int),
+		},
 	}
 }
 
@@ -51,6 +54,9 @@ func (f *FizzBuzzApi) ComputeFizzBuzz(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
+	f.requestStats.RecordRequest(req)
+
 	helper.SafeWrite(w, []byte("["))
 	blockNumber := (req.LimitInteger-1)/outputBlockSize + 1
 	for i := range blockNumber {
@@ -76,10 +82,20 @@ func (f *FizzBuzzApi) ComputeFizzBuzz(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (f *FizzBuzzApi) GetMostPopularFizzBuzz(w http.ResponseWriter, r *http.Request) {
+type mostPopularJsonResponse struct {
+	Parameters FizzBuzzRequestParameters `json:"parameters"`
+	CallNumber int                       `json:"call_number"`
+}
 
-	_, err := io.WriteString(w, "Not Implemented Yet")
+func (f *FizzBuzzApi) GetMostPopularFizzBuzz(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	mostPopular, callAmount := f.requestStats.GetMostPopular()
+	resp := mostPopularJsonResponse{mostPopular, callAmount}
+	bytes, err := json.Marshal(resp)
 	if err != nil {
+		errorHandler.ServerError(w, "Failed to marshal JSON")
 		return
 	}
+	helper.SafeWrite(w, bytes)
+
 }

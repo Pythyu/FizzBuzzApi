@@ -11,6 +11,6 @@ func TestFizzBuzz_ClassicFizzBuzz(t *testing.T) {
 	f := FizzBuzzApi{}
 	output := f.FizzBuzz(3, 5, 1, 15, "Fizz", "Buzz")
 	if !reflect.DeepEqual(output, classicFizzBuzz) {
-		t.Errorf("Invalid ClassicFizzBuzz, returned %s expected %s", output, classicFizzBuzz)
+		t.Fatalf("Invalid ClassicFizzBuzz, returned %s expected %s", output, classicFizzBuzz)
 	}
 }
