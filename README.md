@@ -7,7 +7,7 @@ other developers.
 
 More details on the repository design [here](wiki/Design.md)
 
-This API is publicly available on [http://51.44.217.74:8989/v1/{endpoint}]([public URL](http://51.44.217.74:8989/swagger/index.html))
+This API is publicly available on [http://51.44.217.74:8989/v1/{endpoint}](http://51.44.217.74:8989/swagger/index.html)
 
 ## Main Features
  - REST API
