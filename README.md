@@ -7,6 +7,8 @@ other developers.
 
 More details on the repository design [here](wiki/Design.md)
 
+This API is publicly available on [http://51.44.217.74:8989/v1/{endpoint}]([public URL](http://51.44.217.74:8989/swagger/index.html))
+
 ## Main Features
  - REST API
  - Input Validation
@@ -69,7 +71,7 @@ We also have two build-time environment variables, only used for docker image
 
 ## Api Documentation
 
-You can access the OpenAPI endpoint on [http://localhost:8989/swagger/index.html](http://localhost:8989/swagger/index.html)
+You can access the OpenAPI endpoint on this [public URL](http://51.44.217.74:8989/swagger/index.html)
 
 ### GET /v1/fizzbuzz
 
