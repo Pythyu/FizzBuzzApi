@@ -82,13 +82,13 @@ Returns a fully customizable FizzBuzz sequence
 | first_multiple  | integer | First multiple for fizz string  |
 | second_multiple | integer | Second multiple for buzz string |
 | limit_integer   | integer | Limit number of the sequence    |
-| fizzString      | string  | Fizz replacement                |
-| buzzString      | string  | Buzz replacement                |
+| fizz_string     | string  | Fizz replacement                |
+| buzz_string     | string  | Buzz replacement                |
 
 #### Sample request
 
 ```
-GET /v1/fizzbuzz?first_multiple=3&second_multiple=5&fizzString=Fizz&buzzString=Buzz&limit_integer=15
+GET /v1/fizzbuzz?first_multiple=3&second_multiple=5&fizz_string=Fizz&buzz_string=Buzz&limit_integer=15
 ```
 Response
 ```json

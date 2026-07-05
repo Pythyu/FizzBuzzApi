@@ -53,14 +53,14 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Fizz replacement",
-                        "name": "fizzString",
+                        "name": "fizz_string",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
                         "description": "Buzz replacement",
-                        "name": "buzzString",
+                        "name": "buzz_string",
                         "in": "query",
                         "required": true
                     }

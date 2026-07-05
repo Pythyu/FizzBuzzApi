@@ -30,8 +30,8 @@ type FizzBuzzRequestParameters struct {
 	FirstMultiple  int    `schema:"first_multiple" validate:"required,gt=0"`
 	SecondMultiple int    `schema:"second_multiple" validate:"required,gt=0"`
 	LimitInteger   int    `schema:"limit_integer" validate:"required,gte=1,lte=50000"`
-	FizzString     string `schema:"fizzString" validate:"required"`
-	BuzzString     string `schema:"buzzString" validate:"required"`
+	FizzString     string `schema:"fizz_string" validate:"required"`
+	BuzzString     string `schema:"buzz_string" validate:"required"`
 }
 
 // ComputeFizzBuzz generate a custom FizzBuzz sequence based on given parameters
@@ -43,8 +43,8 @@ type FizzBuzzRequestParameters struct {
 // @Param first_multiple  query int true "First multiple for fizz"
 // @Param second_multiple query int true "Second multiple for buzz"
 // @Param limit_integer   query int true "Limit number of the sequence"
-// @Param fizzString      query string true "Fizz replacement"
-// @Param buzzString      query string true "Buzz replacement"
+// @Param fizz_string      query string true "Fizz replacement"
+// @Param buzz_string      query string true "Buzz replacement"
 // @Success               200 {array} string
 // @Failure               400 {object} errorHandler.ErrorResponse
 // @Router                /fizzbuzz [get]

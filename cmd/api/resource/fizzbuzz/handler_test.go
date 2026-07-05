@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/go-playground/validator/v10"
@@ -14,11 +15,22 @@ import (
 
 const BigRequestBodyLength = 384076
 
-var urlPattern = "http://0.0.0.0/v1/fizzbuzz?first_multiple=%d&second_multiple=%d&limit_integer=%d&fizzString=%s&buzzString=%s"
+var urlPattern = "http://0.0.0.0/v1/fizzbuzz?first_multiple=%d&second_multiple=%d&limit_integer=%d&fizz_string=%s&buzz_string=%s"
 var classicFizzBuzzString = `["1","2","fizz","4","buzz","fizz","7","8","fizz","buzz","11","fizz","13","14","fizzbuzz"]`
 
 func generateURL(first_multiple, second_multiple, limit_integer int, fizzString, buzzString string) string {
 	return fmt.Sprintf(urlPattern, first_multiple, second_multiple, limit_integer, fizzString, buzzString)
+}
+
+func getNewValidator() *validator.Validate {
+	v := validator.New()
+	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		if name := fld.Tag.Get("schema"); name != "" {
+			return name
+		}
+		return fld.Name
+	})
+	return v
 }
 
 type errorJSON struct {
@@ -26,7 +38,7 @@ type errorJSON struct {
 }
 
 func TestFizzBuzz_BasicRequest(t *testing.T) {
-	v := validator.New()
+	v := getNewValidator()
 	f := NewFizzBuzzApi(v)
 	resp := helpers.MockGetRequest(generateURL(3, 5, 15, "fizz", "buzz"), f.ComputeFizzBuzz)
 
@@ -46,7 +58,7 @@ func TestFizzBuzz_BasicRequest(t *testing.T) {
 }
 
 func TestFizzBuzz_BigRequest(t *testing.T) {
-	v := validator.New()
+	v := getNewValidator()
 	f := NewFizzBuzzApi(v)
 	resp := helpers.MockGetRequest(generateURL(3, 5, 50000, "fuzz", "bizz"), f.ComputeFizzBuzz)
 
@@ -66,7 +78,7 @@ func TestFizzBuzz_BigRequest(t *testing.T) {
 }
 
 func TestFizzBuzz_TooBigRequest(t *testing.T) {
-	v := validator.New()
+	v := getNewValidator()
 	f := NewFizzBuzzApi(v)
 	resp := helpers.MockGetRequest(generateURL(3, 5, 5000000, "fuzz", "bizz"), f.ComputeFizzBuzz)
 
@@ -87,13 +99,13 @@ func TestFizzBuzz_TooBigRequest(t *testing.T) {
 	if len(errors.Errors) != 1 {
 		t.Fatalf("Unexpected number of errors: %d", len(errors.Errors))
 	}
-	if errors.Errors[0] != "LimitInteger must be lower or equal than 50000" {
+	if errors.Errors[0] != "limit_integer must be lower or equal than 50000" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
 }
 
 func TestFizzBuzz_BadRequest1(t *testing.T) {
-	v := validator.New()
+	v := getNewValidator()
 	f := NewFizzBuzzApi(v)
 	resp := helpers.MockGetRequest(generateURL(-1, 5, 15, "fizz", "buzz"), f.ComputeFizzBuzz)
 
@@ -114,13 +126,13 @@ func TestFizzBuzz_BadRequest1(t *testing.T) {
 	if len(errors.Errors) != 1 {
 		t.Fatalf("Unexpected number of errors: %d", len(errors.Errors))
 	}
-	if errors.Errors[0] != "FirstMultiple must be greater than 0" {
+	if errors.Errors[0] != "first_multiple must be greater than 0" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
 }
 
 func TestFizzBuzz_BadRequestAllWrong(t *testing.T) {
-	v := validator.New()
+	v := getNewValidator()
 	f := NewFizzBuzzApi(v)
 	resp := helpers.MockGetRequest(generateURL(-1, -4, -2, "", ""), f.ComputeFizzBuzz)
 
@@ -141,25 +153,25 @@ func TestFizzBuzz_BadRequestAllWrong(t *testing.T) {
 	if len(errors.Errors) != 5 {
 		t.Fatalf("Unexpected number of errors: %d", len(errors.Errors))
 	}
-	if errors.Errors[0] != "FirstMultiple must be greater than 0" {
+	if errors.Errors[0] != "first_multiple must be greater than 0" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
-	if errors.Errors[1] != "SecondMultiple must be greater than 0" {
+	if errors.Errors[1] != "second_multiple must be greater than 0" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
-	if errors.Errors[2] != "LimitInteger must be greater or equal than 1" {
+	if errors.Errors[2] != "limit_integer must be greater or equal than 1" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
-	if errors.Errors[3] != "FizzString is a required field" {
+	if errors.Errors[3] != "fizz_string is a required field" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
-	if errors.Errors[4] != "BuzzString is a required field" {
+	if errors.Errors[4] != "buzz_string is a required field" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
 }
 
 func TestFizzBuzz_BadRequestAllNull(t *testing.T) {
-	v := validator.New()
+	v := getNewValidator()
 	f := NewFizzBuzzApi(v)
 	resp := helpers.MockGetRequest(generateURL(0, 0, 0, "", ""), f.ComputeFizzBuzz)
 
@@ -180,19 +192,19 @@ func TestFizzBuzz_BadRequestAllNull(t *testing.T) {
 	if len(errors.Errors) != 5 {
 		t.Fatalf("Unexpected number of errors: %d", len(errors.Errors))
 	}
-	if errors.Errors[0] != "FirstMultiple is a required field" {
+	if errors.Errors[0] != "first_multiple is a required field" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
-	if errors.Errors[1] != "SecondMultiple is a required field" {
+	if errors.Errors[1] != "second_multiple is a required field" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
-	if errors.Errors[2] != "LimitInteger is a required field" {
+	if errors.Errors[2] != "limit_integer is a required field" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
-	if errors.Errors[3] != "FizzString is a required field" {
+	if errors.Errors[3] != "fizz_string is a required field" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
-	if errors.Errors[4] != "BuzzString is a required field" {
+	if errors.Errors[4] != "buzz_string is a required field" {
 		t.Fatalf("Unexpected error message: %s", errors.Errors[0])
 	}
 }
@@ -202,7 +214,7 @@ func BenchmarkRequests(b *testing.B) {
 		b.Skip("Skipping because benchmark are not meant to run on CI")
 	}
 	fullURL := generateURL(3, 5, 5000, "fizz", "buzz")
-	v := validator.New()
+	v := getNewValidator()
 	f := NewFizzBuzzApi(v)
 	b.RunParallel(func(pb *testing.PB) {
 		req := httptest.NewRequest("GET", fullURL, nil)

@@ -62,12 +62,12 @@ paths:
         type: integer
       - description: Fizz replacement
         in: query
-        name: fizzString
+        name: fizz_string
         required: true
         type: string
       - description: Buzz replacement
         in: query
-        name: buzzString
+        name: buzz_string
         required: true
         type: string
       produces:
