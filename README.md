@@ -85,8 +85,38 @@ Returns a fully customizable FizzBuzz sequence
 | fizzString      | string  | Fizz replacement                |
 | buzzString      | string  | Buzz replacement                |
 
+#### Sample request
+
+```
+GET /v1/fizzbuzz?first_multiple=3&second_multiple=5&fizzString=Fizz&buzzString=Buzz&limit_integer=15
+```
+Response
+```json
+["1","2","Fizz","4","Buzz","Fizz","7","8","Fizz","Buzz","11","Fizz","13","14","FizzBuzz"]
+```
+
 ### GET /v1/stats
 
 Returns the parameters corresponding to the most frequently requested FizzBuzz computation and the number of times it has been called.
 
 No parameters.
+
+#### Sample request
+```
+GET /v1/stats
+```
+
+Response
+
+```json
+{
+  "parameters": {
+    "FirstMultiple": 3,
+    "SecondMultiple": 5,
+    "LimitInteger": 15,
+    "FizzString": "fizz",
+    "BuzzString": "buzz"
+  },
+  "call_number": 3
+}
+```
