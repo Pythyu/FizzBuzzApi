@@ -3,6 +3,7 @@ package router
 import (
 	_ "FizzBuzzApi/cmd/api/docs"
 	"FizzBuzzApi/cmd/api/resource/fizzbuzz"
+	"reflect"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -14,6 +15,14 @@ import (
 func New() *chi.Mux {
 	r := chi.NewRouter()
 	v := validator.New()
+
+	// Report field names using the schema struct tag
+	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		if name := fld.Tag.Get("schema"); name != "" {
+			return name
+		}
+		return fld.Name
+	})
 
 	r.Use(httprate.LimitByIP(60, time.Minute))
 
