@@ -13,7 +13,7 @@ Example:
 ```json
 {
   "errors": [
-    "FirstMultiple must be greater than 0"
+    "first_multiple must be greater than 0"
   ]
 }
 ```
